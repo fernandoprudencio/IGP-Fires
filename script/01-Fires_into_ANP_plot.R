@@ -1,5 +1,22 @@
 #' @author  Fernando Prudencio
+#' Este script01 plotea un gr?fico de barras acerca de la camtidad
+#' de incendios ocurridos en ?reas Naturales Protegidas "ANP"
 rm(list = ls())
+
+#' INSTALANDO PAQUETES
+pkg <- c("tidyverse", "sf", "ggplot2")
+
+sapply(
+  pkg,
+  function(x) {
+    is.there <- x %in% rownames(installed.packages())
+    if (is.there == FALSE) {
+      install.packages(x)
+    }
+  }
+)
+
+#' CARGANDO PAQUETES
 library(tidyverse)
 library(sf)
 library(ggplot2)
