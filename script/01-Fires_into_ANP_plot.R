@@ -1,9 +1,19 @@
-#' @author  Fernando Prudencio
-#' Este script01 plotea un gr?fico de barras acerca de la camtidad
-#' de incendios ocurridos en ?reas Naturales Protegidas "ANP"
+#' @title
+#' BarGraph of fires into ANP
+#' 
+#' @description
+#' Este script01 plotea un grafico de barras acerca de la camtidad
+#'   de incendios ocurridos en areas Naturales Protegidas "ANP"
+#'   
+#' @author Fernando Prudencio
+#' 
+#' @data
+#' 'anp', area naturales protegidas
+#' 'fires', registro nacional de incendios 2000-2019 
+
 rm(list = ls())
 
-#' INSTALANDO PAQUETES
+#' Instalando paquetes
 pkg <- c("tidyverse", "sf", "ggplot2")
 
 sapply(
@@ -16,14 +26,18 @@ sapply(
   }
 )
 
-#' CARGANDO PAQUETES
+#' Cargando paquetes
 library(tidyverse)
 library(sf)
 library(ggplot2)
 
-#' CARGANDO DATOS VECTORIALES
+#' Anos a omitir en el registro de incendios
+#'  de no omitir, esribir NULL
+k.omit.yrs <- c(2019)
+
+#' lectura de datos vectoriales
 anp <- st_read("data/vector/anp/ANP.gpkg",
-    layer = "ANP_uptade_2020", quiet = T, as_tibble = T
+    layer = "ANP_update_2020", quiet = T, as_tibble = T
   ) %>%
   dplyr::select(anp_cate, anp_nomb)
 
@@ -31,12 +45,12 @@ fires <-
   st_read("data/vector/fire_register/GPKG_FIRES_REGISTER.gpkg",
     layer = "from_2000_dic2019", quiet = T, as_tibble = T
   ) %>%
-  dplyr::filter(ANO != 2019)
+  dplyr::filter(!ANO %in% c(k.omit.yrs))
 
-#' INTERSECTANDO DATOS VECTORIALES
+#' Intersectando datos vectoriales
 vctr.inter <- st_intersection(fires, anp)
 
-#' CREANDO TIBBLE PARA EL PLOTEO
+#' Creando tibble para el ploteo
 df <- vctr.inter %>%
   as_tibble() %>%
   select(anp_cate, anp_nomb) %>%
@@ -48,14 +62,12 @@ df <- vctr.inter %>%
   ungroup() %>%
   mutate(sortfield = sprintf("%02d", 1:length(nfires)))
 
-#' PLOTEO DE GRAFICO DE BARRAS, NUMERO DE INCENDIOS POR ANP
-plot <- ggplot(df, aes(sortfield, nfires, fill = anp_cate)) +
+#' Ploteo de grafico de berras, numero de incendios por ANP
+plot <- ggplot(df, aes(x = sortfield, y = nfires, fill = anp_cate)) +
   geom_bar(stat = "identity", colour = "black") +
   scale_fill_brewer(palette = "Pastel1") +
   theme_bw() +
-  ylab("Number of fires") +
-  xlab("") +
-  labs(fill = "ANP") +
+  labs(x = "", y = "Number of fires", fill = "ANP") +
   theme(
     legend.title = element_text(size = 20),
     legend.text = element_text(size = 15),
