@@ -9,7 +9,8 @@
 #' 
 #' @data
 #' 'anp', area naturales protegidas
-#' 'fires', registro nacional de incendios 2000-2019 
+#' 'fires', registro nacional de incendios 2000-2019
+#' 'k.omit.yrs', anos omitidos
 
 rm(list = ls())
 
