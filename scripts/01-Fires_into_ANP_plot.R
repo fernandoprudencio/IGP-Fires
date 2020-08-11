@@ -66,7 +66,7 @@ df <- vctr.inter %>%
 #' Ploteo de grafico de berras, numero de incendios por ANP
 plot <- ggplot(df, aes(x = sortfield, y = nfires, fill = anp_cate)) +
   geom_bar(stat = "identity", colour = "black") +
-  scale_fill_brewer(palette = "Pastel1") +
+  scale_fill_brewer(palette = "Spectral") +
   theme_bw() +
   labs(x = "", y = "Number of fires", fill = "ANP") +
   theme(
@@ -79,10 +79,10 @@ plot <- ggplot(df, aes(x = sortfield, y = nfires, fill = anp_cate)) +
     axis.title.x = element_text(size = 15),
     axis.title.y = element_text(size = 15)
   ) +
-  scale_x_discrete(label = df$nom) +
+  scale_x_discrete(label = df$anp_nomb) +
   scale_y_continuous(breaks = seq(0, 30, 5), limits = c(0, 30))
-plot
+
 ggsave(plot,
-  filename = "exports/Fires_into_ANP_v2.png",
+  filename = "exports/Fires_into_ANP.png",
   width = 30, height = 25, units = "cm", dpi = 1000
 )
