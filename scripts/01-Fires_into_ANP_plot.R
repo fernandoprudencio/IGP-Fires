@@ -1,9 +1,9 @@
 #' @title
-#' BarGraph of fires into ANP
+#' BarGraph of fires within ANP
 #' 
 #' @description
-#' Este script01 plotea un grafico de barras acerca de la camtidad
-#'   de incendios ocurridos en areas Naturales Protegidas "ANP"
+#' This script plots a bar graph about the number of fires that occurred in
+#'   Natural Protected Areas "ANP
 #'   
 #' @author Fernando Prudencio
 #' 
@@ -14,7 +14,7 @@
 
 rm(list = ls())
 
-#' Instalando paquetes
+#' INSTALL PACKAGES
 pkg <- c("tidyverse", "sf", "ggplot2")
 
 sapply(
@@ -27,7 +27,7 @@ sapply(
   }
 )
 
-#' Cargando paquetes
+#' LOAD LIBRARIES
 library(tidyverse)
 library(sf)
 library(ggplot2)
@@ -36,29 +36,28 @@ library(ggplot2)
 #'  de no omitir, esribir NULL
 k.omit.yrs <- c(2019)
 
-#' lectura de datos vectoriales
-anp <- st_read("data/vector/anp/ANP.gpkg",
+#' LOAD VECTORIAL DATA
+anp <- st_read("data/vector/anp.gpkg",
     layer = "ANP_update_2020", quiet = T, as_tibble = T
   ) %>%
   dplyr::select(anp_cate, anp_nomb)
 
 fires <-
-  st_read("data/vector/fire_register/GPKG_FIRES_REGISTER.gpkg",
+  st_read("data/vector/fire_register.gpkg",
     layer = "from_2000_dic2019", quiet = T, as_tibble = T
-  ) %>%
-  dplyr::filter(!ANO %in% c(k.omit.yrs))
+  )# %>%
+  #dplyr::filter(!ANO %in% c(k.omit.yrs))
 
-#' Intersectando datos vectoriales
+#' INTERSECT VECTORIAL DATA
 vctr.inter <- st_intersection(fires, anp)
 
-#' Creando tibble para el ploteo
+#' BUILD DATAFRAME TO PLOT
 df <- vctr.inter %>%
   as_tibble() %>%
   select(anp_cate, anp_nomb) %>%
-  mutate(nfires = 1) %>%
   group_by(anp_cate, anp_nomb) %>%
-  summarise(nfires = sum(nfires)) %>%
-  mutate(nom = sprintf("%1$s %2$s", anp_cate, anp_nomb)) %>%
+  summarise(nfires = n()) %>%
+  mutate(nam = sprintf("%1$s %2$s", anp_cate, anp_nomb)) %>%
   arrange(anp_cate, nfires) %>%
   ungroup() %>%
   mutate(sortfield = sprintf("%02d", 1:length(nfires)))
@@ -68,19 +67,31 @@ plot <- ggplot(df, aes(x = sortfield, y = nfires, fill = anp_cate)) +
   geom_bar(stat = "identity", colour = "black") +
   scale_fill_brewer(palette = "Spectral") +
   theme_bw() +
-  labs(x = "", y = "Number of fires", fill = "ANP") +
-  theme(
-    legend.title = element_text(size = 20),
-    legend.text = element_text(size = 15),
-    plot.title = element_text(size = 20, hjust = 0.5),
-    plot.subtitle = element_text(size = 12, hjust = 0.5),
-    axis.text.x = element_text(size = 16, angle = 90, hjust = 1),
-    axis.text.y = element_text(size = 16),
-    axis.title.x = element_text(size = 15),
-    axis.title.y = element_text(size = 15)
-  ) +
+  labs(y = "Número de incendios", fill = "ANP") +
   scale_x_discrete(label = df$anp_nomb) +
-  scale_y_continuous(breaks = seq(0, 30, 5), limits = c(0, 30))
+  scale_y_continuous(breaks = seq(0, 30, 5), limits = c(0, 30)) +
+  theme(
+    legend.background = element_rect(fill = "white", color = "black"),
+    legend.position = c(0.87, 0.71),
+    legend.margin = margin(3, 7, 7, 7),
+    legend.title = element_text(size = 20, family = "ubuntu"),
+    legend.text = element_text(size = 15, family = "ubuntu"),
+    legend.key.width = unit(.9, "cm"),
+    legend.key.height = unit(.4, "cm"),
+    plot.title = element_text(size = 20, hjust = 0.5, family = "ubuntu"),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, family = "ubuntu"),
+    axis.text.x = element_text(
+      size = 16, angle = 90, hjust = 1, family = "ubuntu", vjust = 0
+    ),
+    axis.text.y = element_text(size = 16, family = "ubuntu"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 15, family = "ubuntu"),
+    axis.ticks.x = element_line(color = "black"),
+    axis.ticks.y = element_line(color = "black"),
+    
+    panel.grid = element_blank()
+  )
+plot
 
 ggsave(plot,
   filename = "exports/Fires_into_ANP.png",
